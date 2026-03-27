@@ -17,7 +17,11 @@ def transcribe_top_reels(scored_reels: list[dict], top_n: int = TOP_N_TRANSCRIBE
     Returns dict mapping reel_id -> transcript text.
     Only processes reels with a direct video URL (Content-Type: video/*).
     """
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("  ⚠️  OPENAI_API_KEY not set — skipping transcription")
+        return {}
+    client = OpenAI(api_key=api_key)
     sorted_reels = sorted(scored_reels, key=lambda r: r.get("viral_score", 0), reverse=True)
     candidates = sorted_reels[:top_n]
 
@@ -25,8 +29,10 @@ def transcribe_top_reels(scored_reels: list[dict], top_n: int = TOP_N_TRANSCRIBE
 
     for reel in candidates:
         reel_id = reel.get("reel_id", "")
-        video_url = reel.get("video_url")
+        if not reel_id:
+            continue
 
+        video_url = reel.get("video_url")
         if not video_url:
             continue
 
