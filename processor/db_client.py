@@ -14,8 +14,17 @@ def get_client() -> Client:
     )
 
 
+VALID_HOOK_TYPES = {'identiteit', 'tegenstelling', 'discipline', 'transformatie', 'lifestyle', 'anders'}
+VALID_THEMES = {'hybrid', 'kracht', 'voeding', 'mindset', 'lifestyle', 'anders'}
+
+
 def upsert_reel(reel: dict) -> None:
     """Inserts or updates a reel record using reel_id as the conflict key."""
+    reel = dict(reel)
+    if reel.get("hook_type") not in VALID_HOOK_TYPES:
+        reel["hook_type"] = "anders"
+    if reel.get("theme") not in VALID_THEMES:
+        reel["theme"] = "anders"
     client = get_client()
     client.table("reels").upsert(reel, on_conflict="reel_id").execute()
 
