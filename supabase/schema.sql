@@ -55,3 +55,9 @@ create policy "anon read summaries" on summaries
 
 -- Allow service_role (GitHub Actions processor) full access (default: already has it)
 -- Note: hook_type/theme columns are intentionally not indexed — dashboard filters these client-side
+
+-- Dashboard v2 columns
+alter table reels add column if not exists transcript text;
+alter table reels add column if not exists source text default 'account';
+alter table reels add column if not exists niche_tag text
+  check (niche_tag is null or niche_tag like '#%');
