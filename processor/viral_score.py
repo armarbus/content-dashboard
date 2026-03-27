@@ -21,6 +21,8 @@ def calculate_viral_score(
     engagement_score = min(20, engagement * 200)
 
     # Recency bonus: full points within 14 days, zero after (max 10 pts)
+    # Clamp days to >= 0 to guard against timezone bugs or API timestamp quirks
+    days_since_posted = max(0.0, days_since_posted)
     recency = max(0.0, 1.0 - (days_since_posted / 14))
     recency_score = recency * 10
 
