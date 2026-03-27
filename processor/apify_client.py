@@ -19,6 +19,8 @@ ACCOUNTS = [
     {"handle": "aymanraoul",     "is_own": True},
 ]
 
+DISCOVERY_HASHTAGS = ["hybridtraining"]  # extend list to add more hashtags
+
 
 def fetch_reels_for_account(handle: str, max_results: int = 10) -> list[dict]:
     """
@@ -73,3 +75,28 @@ def fetch_all_accounts(max_per_account: int = 10) -> list[dict]:
                 results.append(parsed)
         print(f"  → {len(raw_items)} items fetched")
     return results
+
+
+def fetch_hashtag_reels(hashtag: str, max_results: int = 20) -> list[dict]:
+    """
+    Fetches up to max_results reels for a given hashtag via Apify.
+    Returns a list of parsed dicts ready for scoring/analysis.
+    Uses the 'hashtags' actor input key (not directUrls).
+    """
+    client = ApifyClient(os.environ["APIFY_API_TOKEN"])
+    run_input = {
+        "hashtags": [hashtag],
+        "resultsType": "posts",
+        "resultsLimit": max_results,
+        "addParentData": False,
+    }
+    run = client.actor(ACTOR_ID).call(run_input=run_input)
+    items = list(client.dataset(run["defaultDatasetId"]).iterate_items())
+    parsed = []
+    for raw in items:
+        p = parse_reel(raw, handle=raw.get("ownerUsername", "unknown"), is_own=False)
+        if p and p["reel_id"]:
+            p["source"] = "hashtag"
+            p["niche_tag"] = f"#{hashtag}"
+            parsed.append(p)
+    return parsed
