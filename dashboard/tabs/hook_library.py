@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 from dashboard.queries import get_reels
+from dashboard.components.reel_modal import show_reel_modal
 
 HOOK_TYPES = ["identiteit", "tegenstelling", "discipline", "transformatie", "lifestyle", "anders"]
 
@@ -31,13 +32,16 @@ def render(week):
 
     st.markdown("---")
     for reel in filtered:
-        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+        col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
-            st.markdown(f"**{reel.get('hook', '—')}**")
+            if reel.get("thumbnail_url"):
+                st.image(reel["thumbnail_url"], width=120)
         with col2:
-            st.caption(reel.get("hook_type", "—"))
+            score = reel.get("viral_score", 0)
+            hook = reel.get("hook", "—")
+            st.markdown(f"**{hook[:80]}{'…' if len(hook) > 80 else ''}** `{score}`")
+            st.caption(f"`{reel.get('hook_type', '—')}` · @{reel.get('competitor_handle', '—')}")
         with col3:
-            st.caption(f"Score: {reel.get('viral_score', 0)}")
-        with col4:
-            if reel.get("video_url"):
-                st.markdown(f"[🔗]({reel['video_url']})")
+            if st.button("🔍 Bekijk", key=f"hl_{reel['reel_id']}"):
+                show_reel_modal(reel)
+        st.divider()
