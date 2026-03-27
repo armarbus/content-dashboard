@@ -59,7 +59,7 @@ def show_reel_modal(reel: dict):
 
     with col_left:
         if reel.get("thumbnail_url"):
-            st.image(reel["thumbnail_url"], use_container_width=True)
+            st.image(reel["thumbnail_url"], width=300)
         if reel.get("video_url"):
             st.link_button("🔗 Bekijk op Instagram", reel["video_url"])
 
