@@ -50,3 +50,15 @@ def get_summary(week):
         .execute()
     )
     return response.data[0] if response.data else None
+
+
+@st.cache_data(ttl=300)
+def get_niche_reels(week=None, min_score=0):
+    """Fetches reels scraped via hashtag discovery (source='hashtag')."""
+    q = get_client().table("reels").select("*").eq("source", "hashtag")
+    if week:
+        q = q.eq("week_start_date", week)
+    if min_score > 0:
+        q = q.gte("viral_score", min_score)
+    response = q.order("viral_score", desc=True).execute()
+    return response.data
