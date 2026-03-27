@@ -51,7 +51,8 @@ def extract_hook_text(caption: Optional[str]) -> str:
 
 def build_prompt_content(caption: str, handle: str) -> str:
     hook_hint = extract_hook_text(caption)
-    return f"""Account: @{handle}
+    return f"""Niche: hybrid performance (kracht + hardlopen, discipline, masculinity)
+Account: @{handle}
 Caption: {caption or "(geen caption beschikbaar)"}
 Mogelijke hook (eerste woorden): {hook_hint or "(niet extraheerbaar, genereer zelf)"}
 
