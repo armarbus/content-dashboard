@@ -54,9 +54,9 @@ def parse_reel(raw: dict, handle: str, is_own: bool) -> dict:
         "video_url":         raw.get("url") or f"https://www.instagram.com/reel/{raw.get('shortCode', '')}/",
         "thumbnail_url":     raw.get("displayUrl", ""),
         "caption":           raw.get("caption", "") or "",
-        "views":             raw.get("videoViewCount") or raw.get("videoPlayCount") or 0,
-        "likes":             raw.get("likesCount") or 0,
-        "comments":          raw.get("commentsCount") or 0,
+        "views":             max(0, raw.get("videoViewCount") or raw.get("videoPlayCount") or 0),
+        "likes":             max(0, raw.get("likesCount") or 0),
+        "comments":          max(0, raw.get("commentsCount") or 0),
         "posted_at":         raw.get("timestamp"),
     }
 
