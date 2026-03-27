@@ -1,4 +1,8 @@
 # dashboard/app.py
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import streamlit as st
 from dashboard.queries import get_available_weeks
 from dashboard.tabs import viral_overview, competitor_breakdown, hook_library, value_content, my_performance, weekly_summary
