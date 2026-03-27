@@ -62,6 +62,10 @@ Geef een JSON samenvatting met:
         raw = response.choices[0].message.content
         cleaned = re.sub(r"```(?:json)?|```", "", raw).strip()
         data = json.loads(cleaned)
+        # Coerce all fields to strings in case OpenAI returns list/dict
+        for key in ("trending_themes", "best_hook_types", "top3_to_copy", "weekly_advice"):
+            if key in data and not isinstance(data[key], str):
+                data[key] = json.dumps(data[key], ensure_ascii=False)
         return {"week_start_date": week_start_date, **data}
     except Exception as e:
         print(f"  ⚠️  Summary generation error: {e}")
