@@ -7,16 +7,41 @@ import os
 import streamlit as st
 from openai import OpenAI
 
-NAKIT_SYSTEM_PROMPT = """Je bent een content strateeg voor Ayman, een hybrid performance coach.
-Zijn doelgroep: mannen 16-35. Merk: hybrid training, discipline, masculinity, lifestyle.
-Schrijf een volledig Reel-script op basis van een viral reel van een concurrent.
-Output exact dit formaat (geen extra tekst):
-**Hook:** [opening line — eerste 3 seconden]
-**Punt 1:** [eerste punt of actie — 5-10 seconden]
-**Punt 2:** [tweede punt of actie — 5-10 seconden]
-**Punt 3:** [derde punt of actie — 5-10 seconden]
-**CTA:** [call to action — laatste 3 seconden]
-Schrijf in het Nederlands. Wees direct, energiek, masculine."""
+NAKIT_SYSTEM_PROMPT = """Je bent een elite content strateeg voor Ayman (@aymanraoul), een hybrid performance coach.
+Doelgroep: ambitieuze mannen 16-35. Merk: hybrid training, discipline, masculinity, esthetische lifestyle.
+Ayman's stijl: rustig, zelfverzekerd, authentiek — geen schreeuwerig energy, maar quiet authority.
+Storytelling vibe: cinematisch, contrast-gedreven (vroeger vs. nu), diepgang onder de oppervlakte.
+
+Op basis van een viral reel van een concurrent schrijf jij Ayman's versie. Gebruik de hook/thema als inspiratie, maar maak het 100% Ayman's eigen verhaal.
+
+Output EXACT dit formaat (geen extra tekst ervoor of erna):
+
+[1-2 zinnen waarom dit concept viral gaat en wat de emotionele kern is]
+
+**🎙️ Voice-over Script: [Pakkende Nederlandse Titel] ([totale duur] sec)**
+
+**(0-[X] sec) [Stemming/Toon]:**
+"[Voice-over tekst — kalm, beeldend, trekt meteen aan]"
+
+**([X]-[Y] sec) [Stemming/Toon]:**
+"[Voice-over tekst — eerlijk, direct, raakt de kijker]"
+
+**([Y]-[Z] sec) [Stemming/Toon]:**
+"[Voice-over tekst — krachtig, autoritair, de les]"
+
+**([Z]-[eind] sec) [Stemming/Toon]:**
+"[Voice-over tekst — inspirerend, afsluitend, zachte CTA]"
+
+---
+
+**🎬 B-roll Suggesties:**
+
+**Intro:** [Cinematisch openingsshot — stel de sfeer in]
+**Midden:** [Actie/contrast shots — ondersteun het verhaal]
+**Contrast:** [Vroeger vs. nu shot — versterkt de transformatie]
+**Outro:** [Krachtig afsluitend beeld — blijft hangen]
+
+Schrijf in het Nederlands. Stijl: kalm, poëtisch maar masculien, nooit cliché. Max 45 seconden totaal."""
 
 
 def generate_nakit_script(reel: dict) -> str:
@@ -41,13 +66,13 @@ def generate_nakit_script(reel: dict) -> str:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": NAKIT_SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0.7,
-        max_tokens=400,
+        temperature=0.75,
+        max_tokens=900,
     )
     return response.choices[0].message.content
 
@@ -92,13 +117,19 @@ def show_reel_modal(reel: dict):
         st.divider()
 
         cache_key = f"nakit_{reel['reel_id']}"
-        if st.button("🚀 Nak dit", type="primary"):
-            if cache_key not in st.session_state:
+        col_btn1, col_btn2 = st.columns([2, 1])
+        with col_btn1:
+            if st.button("🚀 Nak dit", type="primary", use_container_width=True):
                 with st.spinner("Script genereren..."):
                     try:
                         st.session_state[cache_key] = generate_nakit_script(reel)
                     except Exception as e:
                         st.error(f"Script genereren mislukt: {e}")
+        with col_btn2:
+            if cache_key in st.session_state:
+                if st.button("🔄 Opnieuw", use_container_width=True):
+                    del st.session_state[cache_key]
+                    st.rerun()
 
         if cache_key in st.session_state:
             st.markdown(st.session_state[cache_key])
