@@ -1,43 +1,41 @@
 # dashboard/components/reel_card.py
 """
-Shared reel card renderer used across all tabs.
-Renders a single reel as a bordered card with score badge + hook + metadata.
+Shared reel card renderer — Back 2 Work brand guidelines.
+Colors: #E9003A red, #00C27A green, #B7B7B7 silver, #1E1E1E steel grey.
 """
 import streamlit as st
 from dashboard.components.reel_modal import show_reel_modal
 
 
 def _score_badge(score: int) -> str:
-    """Returns an HTML pill badge coloured by score tier."""
+    """Returns a brand-styled score badge. Green ≥70, Red ≥50, Silver <50."""
     if score >= 70:
-        color, bg = "#4ade80", "rgba(74,222,128,0.12)"
+        color, bg = "#00C27A", "rgba(0,194,122,0.10)"
     elif score >= 50:
-        color, bg = "#fbbf24", "rgba(251,191,36,0.12)"
+        color, bg = "#E9003A", "rgba(233,0,58,0.10)"
     else:
-        color, bg = "#f87171", "rgba(248,113,113,0.12)"
+        color, bg = "#B7B7B7", "rgba(183,183,183,0.08)"
     return (
         f'<span style="display:inline-block;background:{bg};color:{color};'
-        f'padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;'
-        f'border:1px solid {color}28;margin-right:6px;vertical-align:middle">'
+        f'padding:1px 8px;border-radius:2px;font-size:11px;font-weight:700;'
+        f'font-family:Roboto Mono,monospace;letter-spacing:0.5px;'
+        f'border:1px solid {color}40;margin-right:8px;vertical-align:middle">'
         f'{score}</span>'
     )
 
 
 def _placeholder() -> None:
-    """Renders a grey placeholder when thumbnail is missing."""
     st.markdown(
-        '<div style="width:110px;height:80px;background:rgba(255,255,255,0.04);'
-        'border-radius:8px;display:flex;align-items:center;justify-content:'
-        'center;font-size:26px;color:#374151">🎬</div>',
+        '<div style="width:110px;height:80px;background:#1E1E1E;'
+        'border:1px solid #2a2a2a;border-radius:2px;'
+        'display:flex;align-items:center;justify-content:center;'
+        'font-size:18px;color:#B7B7B7;font-family:Roboto Mono,monospace">▶</div>',
         unsafe_allow_html=True,
     )
 
 
 def render_reel_card(reel: dict, button_key: str) -> None:
-    """
-    Renders a single reel row as a bordered card.
-    Opens the shared modal on Bekijk click.
-    """
+    """Renders a single reel row as a brand-styled bordered card."""
     score = reel.get("viral_score", 0)
     hook = reel.get("hook", "—")
     hook_display = f"{hook[:88]}{'…' if len(hook) > 88 else ''}"
@@ -46,13 +44,13 @@ def render_reel_card(reel: dict, button_key: str) -> None:
     hook_type = reel.get("hook_type", "—")
     views = reel.get("views", 0)
 
-    meta_items = [
-        f'<span style="color:#9ca3af">@{handle}</span>',
-        f'<span style="color:#6b7280">{theme}</span>',
-        f'<span style="color:#6b7280">{hook_type}</span>',
-        f'<span style="color:#6b7280">👁 {views:,}</span>',
-    ]
-    meta_html = ' <span style="color:#374151;margin:0 3px">·</span> '.join(meta_items)
+    sep = '<span style="color:#2a2a2a;margin:0 5px">|</span>'
+    meta_html = (
+        f'<span style="color:#B7B7B7;font-size:11px;font-family:Inter,sans-serif">'
+        f'@{handle}{sep}{theme}{sep}{hook_type}'
+        f'{sep}<span style="font-family:Roboto Mono,monospace">{views:,}</span> views'
+        f'</span>'
+    )
 
     with st.container(border=True):
         col1, col2, col3 = st.columns([1, 6, 1])
@@ -64,15 +62,15 @@ def render_reel_card(reel: dict, button_key: str) -> None:
         with col2:
             st.markdown(
                 f'{_score_badge(score)}'
-                f'<span style="font-size:14px;font-weight:600;color:#f1f5f9;'
-                f'line-height:1.5;vertical-align:middle">{hook_display}</span>',
+                f'<span style="font-size:14px;font-weight:600;color:#F5F5F5;'
+                f'font-family:Inter,sans-serif;line-height:1.5;vertical-align:middle">'
+                f'{hook_display}</span>',
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f'<div style="font-size:12px;margin-top:5px;line-height:1.6">'
-                f'{meta_html}</div>',
+                f'<div style="margin-top:4px">{meta_html}</div>',
                 unsafe_allow_html=True,
             )
         with col3:
-            if st.button("Bekijk", key=button_key, use_container_width=True):
+            if st.button("BEKIJK", key=button_key, use_container_width=True):
                 show_reel_modal(reel)

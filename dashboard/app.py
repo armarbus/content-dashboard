@@ -12,30 +12,39 @@ from dashboard.tabs import (
 )
 
 st.set_page_config(
-    page_title="Content Dashboard — Ayman",
+    page_title="Back 2 Work — Content Dashboard",
     page_icon="🔥",
     layout="wide",
 )
 
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
-# ── Header ────────────────────────────────────────────────────────────────────
+# ── Header ─────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="margin-bottom:4px">
-    <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.8px;margin:0;line-height:1.2">
-        🔥 Content Research Dashboard
-    </h1>
-    <p style="color:#6b7280;font-size:12px;margin:4px 0 0 2px;letter-spacing:1px;
-       text-transform:uppercase;font-weight:500">
-        Hybrid Performance &nbsp;·&nbsp; @aymanraoul &nbsp;·&nbsp; @ronencaspers
-    </p>
+<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #1E1E1E">
+    <span style="font-family:'Anton',sans-serif;font-size:26px;font-weight:400;
+        text-transform:uppercase;letter-spacing:0.06em;color:#F5F5F5;
+        line-height:1">BACK 2 WORK</span>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <span style="width:20px;height:2px;background:#E9003A;display:inline-block;flex-shrink:0"></span>
+        <span style="color:#B7B7B7;font-size:10px;font-weight:700;letter-spacing:2px;
+              text-transform:uppercase;font-family:Inter,sans-serif">
+            Content Research Dashboard
+        </span>
+        <span style="width:20px;height:2px;background:#E9003A;display:inline-block;flex-shrink:0"></span>
+        <span style="color:#B7B7B7;font-size:10px;letter-spacing:1px;font-family:Roboto Mono,monospace">
+            @aymanraoul · @ronencaspers
+        </span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Sidebar ────────────────────────────────────────────────────────────────────
+# ── Sidebar ─────────────────────────────────────────────────────────────────
 st.sidebar.markdown("""
-<p style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-   color:#6b7280;margin-bottom:16px">Filters</p>
+<p style="font-family:Inter,sans-serif;font-size:9px;font-weight:700;
+   letter-spacing:2.5px;text-transform:uppercase;color:#B7B7B7;margin-bottom:16px">
+   Filters
+</p>
 """, unsafe_allow_html=True)
 
 weeks = get_available_weeks()
@@ -46,15 +55,16 @@ if not weeks:
 selected_week = st.sidebar.selectbox("Week", weeks, index=0)
 min_score = st.sidebar.slider("Minimale Viral Score", 0, 100, 60)
 
-st.sidebar.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:16px 0'>", unsafe_allow_html=True)
 st.sidebar.markdown("""
-<p style="font-size:10px;color:#4b5563;letter-spacing:0.5px">
-    Data ververst wekelijks via GitHub Actions.<br>
-    Scraper: apify/instagram-scraper
-</p>
+<div style="margin-top:24px;padding-top:16px;border-top:1px solid #1E1E1E">
+    <p style="font-family:Roboto Mono,monospace;font-size:10px;color:#B7B7B7;
+       letter-spacing:0.3px;margin:0">Data refresht wekelijks</p>
+    <p style="font-family:Roboto Mono,monospace;font-size:10px;color:#2a2a2a;
+       letter-spacing:0.3px;margin:4px 0 0 0">apify/instagram-scraper</p>
+</div>
 """, unsafe_allow_html=True)
 
-# ── Tabs ───────────────────────────────────────────────────────────────────────
+# ── Tabs ────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🔥 Viral Content",
     "🔍 Niche Discovery",

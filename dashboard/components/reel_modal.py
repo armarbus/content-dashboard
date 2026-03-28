@@ -90,25 +90,61 @@ def show_reel_modal(reel: dict):
 
     with col_right:
         score = reel.get("viral_score", 0)
-        badge = "🟢" if score >= 70 else "🟡" if score >= 50 else "🔴"
+        if score >= 70:
+            s_color, s_bg = "#00C27A", "rgba(0,194,122,0.10)"
+        elif score >= 50:
+            s_color, s_bg = "#E9003A", "rgba(233,0,58,0.10)"
+        else:
+            s_color, s_bg = "#B7B7B7", "rgba(183,183,183,0.08)"
 
-        st.markdown(f"**@{reel.get('competitor_handle', '—')}** · {str(reel.get('posted_at', ''))[:10]}")
-        st.markdown(f"{badge} Viral Score: **{score}**")
+        st.markdown(
+            f'<p style="font-family:Inter,sans-serif;font-size:12px;color:#B7B7B7;margin:0 0 6px 0">'
+            f'<span style="color:#F5F5F5;font-weight:700">@{reel.get("competitor_handle","—")}</span>'
+            f' &nbsp;·&nbsp; {str(reel.get("posted_at",""))[:10]}</p>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<span style="display:inline-block;background:{s_bg};color:{s_color};'
+            f'padding:2px 10px;border-radius:2px;font-size:12px;font-weight:700;'
+            f'font-family:Roboto Mono,monospace;letter-spacing:0.5px;'
+            f'border:1px solid {s_color}40;margin-bottom:10px">SCORE {score}</span>',
+            unsafe_allow_html=True,
+        )
 
-        st.markdown(f"**Hook:** {reel.get('hook', '—')}")
+        st.markdown(
+            f'<p style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;'
+            f'color:#F5F5F5;line-height:1.5;margin:0 0 8px 0">'
+            f'{reel.get("hook", "—")}</p>',
+            unsafe_allow_html=True,
+        )
         col_chips1, col_chips2 = st.columns(2)
         with col_chips1:
-            st.caption(f"Type: `{reel.get('hook_type', '—')}`")
+            st.markdown(
+                f'<span style="font-family:Roboto Mono,monospace;font-size:11px;'
+                f'color:#B7B7B7;background:#1E1E1E;padding:2px 8px;border-radius:2px">'
+                f'{reel.get("hook_type","—")}</span>',
+                unsafe_allow_html=True,
+            )
         with col_chips2:
-            st.caption(f"Thema: `{reel.get('theme', '—')}`")
+            st.markdown(
+                f'<span style="font-family:Roboto Mono,monospace;font-size:11px;'
+                f'color:#B7B7B7;background:#1E1E1E;padding:2px 8px;border-radius:2px">'
+                f'{reel.get("theme","—")}</span>',
+                unsafe_allow_html=True,
+            )
 
         cols = st.columns(3)
-        cols[0].metric("Views", f"{reel.get('views', 0):,}")
-        cols[1].metric("Likes", f"{reel.get('likes', 0):,}")
-        cols[2].metric("Comments", f"{reel.get('comments', 0):,}")
+        cols[0].metric("VIEWS", f"{reel.get('views', 0):,}")
+        cols[1].metric("LIKES", f"{reel.get('likes', 0):,}")
+        cols[2].metric("COMMENTS", f"{reel.get('comments', 0):,}")
 
         if reel.get("ai_why"):
-            st.markdown(f"**Waarom viral:** {reel['ai_why']}")
+            st.markdown(
+                f'<p style="font-family:Inter,sans-serif;font-size:13px;color:#B7B7B7;'
+                f'border-left:2px solid #E9003A;padding-left:10px;margin:8px 0">'
+                f'{reel["ai_why"]}</p>',
+                unsafe_allow_html=True,
+            )
 
         if reel.get("transcript"):
             with st.expander("📝 Transcriptie"):
@@ -119,7 +155,7 @@ def show_reel_modal(reel: dict):
         cache_key = f"nakit_{reel['reel_id']}"
         col_btn1, col_btn2 = st.columns([2, 1])
         with col_btn1:
-            if st.button("🚀 Nak dit", type="primary", use_container_width=True):
+            if st.button("🚀 NAK DIT", type="primary", use_container_width=True):
                 with st.spinner("Script genereren..."):
                     try:
                         st.session_state[cache_key] = generate_nakit_script(reel)
@@ -127,7 +163,7 @@ def show_reel_modal(reel: dict):
                         st.error(f"Script genereren mislukt: {e}")
         with col_btn2:
             if cache_key in st.session_state:
-                if st.button("🔄 Opnieuw", use_container_width=True):
+                if st.button("↺ OPNIEUW", use_container_width=True):
                     del st.session_state[cache_key]
                     st.rerun()
 
