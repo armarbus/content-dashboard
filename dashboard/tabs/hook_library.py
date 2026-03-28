@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 from dashboard.queries import get_reels
-from dashboard.components.reel_modal import show_reel_modal
+from dashboard.components.reel_card import render_reel_card
 
 HOOK_TYPES = ["identiteit", "tegenstelling", "discipline", "transformatie", "lifestyle", "anders"]
 
@@ -27,21 +27,11 @@ def render(week):
     if "hook_type" in df.columns and "viral_score" in df.columns:
         summary = df.groupby("hook_type")["viral_score"].agg(["mean", "count"]).reset_index()
         summary.columns = ["Hook Type", "Gem. Score", "Aantal"]
+        summary["Gem. Score"] = summary["Gem. Score"].round(1)
         summary = summary.sort_values("Gem. Score", ascending=False)
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    st.markdown("---")
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
     for reel in filtered:
-        col1, col2, col3 = st.columns([1, 6, 1])
-        with col1:
-            if reel.get("thumbnail_url"):
-                st.image(reel["thumbnail_url"], width=120)
-        with col2:
-            score = reel.get("viral_score", 0)
-            hook = reel.get("hook", "—")
-            st.markdown(f"**{hook[:80]}{'…' if len(hook) > 80 else ''}** `{score}`")
-            st.caption(f"`{reel.get('hook_type', '—')}` · @{reel.get('competitor_handle', '—')}")
-        with col3:
-            if st.button("🔍 Bekijk", key=f"hl_{reel['reel_id']}"):
-                show_reel_modal(reel)
-        st.divider()
+        render_reel_card(reel, button_key=f"hl_{reel['reel_id']}")

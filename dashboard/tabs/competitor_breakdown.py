@@ -1,9 +1,15 @@
 # dashboard/tabs/competitor_breakdown.py
 import streamlit as st
 from dashboard.queries import get_reels
-from dashboard.components.reel_modal import show_reel_modal
+from dashboard.components.reel_card import render_reel_card
 
-ACCOUNTS = ["williamdurnik", "chrismouton_", "harleysshields", "kvnramirezz", "alexmegino", "kirstyhendey"]
+ACCOUNTS = [
+    "williamdurnik", "chrismouton_", "harleysshields",
+    "kvnramirezz", "alexmegino", "kirstyhendey",
+    "fit.dad.phil", "ferguscrawley", "matt_zelaya",
+    "alecblenis", "alex_kukla", "cchungy_",
+    "ronencaspers",
+]
 
 
 def render(week, min_score):
@@ -19,17 +25,4 @@ def render(week, min_score):
     st.caption(f"{len(reels)} Reels voor @{handle} · gesorteerd op Viral Score")
 
     for reel in reels:
-        col1, col2, col3 = st.columns([1, 6, 1])
-        with col1:
-            if reel.get("thumbnail_url"):
-                st.image(reel["thumbnail_url"], width=120)
-        with col2:
-            score = reel.get("viral_score", 0)
-            badge = "🟢" if score >= 70 else "🟡" if score >= 50 else "🔴"
-            hook = reel.get("hook", "—")
-            st.markdown(f"**{hook[:80]}{'…' if len(hook) > 80 else ''}** {badge} `{score}`")
-            st.caption(f"{reel.get('theme', '—')} · {reel.get('hook_type', '—')} · 👁 {reel.get('views', 0):,}")
-        with col3:
-            if st.button("🔍 Bekijk", key=f"cb_{reel['reel_id']}"):
-                show_reel_modal(reel)
-        st.divider()
+        render_reel_card(reel, button_key=f"cb_{reel['reel_id']}")

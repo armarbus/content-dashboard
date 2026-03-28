@@ -10,16 +10,27 @@ from apify_client import ApifyClient
 ACTOR_ID = "apify/instagram-scraper"
 
 ACCOUNTS = [
+    # Eigen account
+    {"handle": "aymanraoul",     "is_own": True},
+    # Bestaande concurrenten
     {"handle": "williamdurnik",  "is_own": False},
     {"handle": "chrismouton_",   "is_own": False},
     {"handle": "harleysshields", "is_own": False},
     {"handle": "kvnramirezz",    "is_own": False},
     {"handle": "alexmegino",     "is_own": False},
     {"handle": "kirstyhendey",   "is_own": False},
-    {"handle": "aymanraoul",     "is_own": True},
+    # Nieuwe hybrid content machines (toegevoegd 2026-03-28)
+    {"handle": "fit.dad.phil",   "is_own": False},
+    {"handle": "ferguscrawley",  "is_own": False},
+    {"handle": "matt_zelaya",    "is_own": False},
+    {"handle": "alecblenis",     "is_own": False},
+    {"handle": "alex_kukla",     "is_own": False},
+    {"handle": "cchungy_",       "is_own": False},
+    # Compagnon
+    {"handle": "ronencaspers",   "is_own": False},
 ]
 
-DISCOVERY_HASHTAGS = ["hybridtraining"]  # extend list to add more hashtags
+DISCOVERY_HASHTAGS = ["hybridtraining", "hybridathlete", "runandlift"]
 
 
 def fetch_reels_for_account(handle: str, max_results: int = 10) -> list[dict]:

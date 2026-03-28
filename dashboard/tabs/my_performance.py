@@ -4,9 +4,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dashboard.queries import get_reels
-from dashboard.components.reel_modal import show_reel_modal
+from dashboard.components.reel_card import render_reel_card
 
-MIN_SAMPLE = 3  # minimum own-reel count per hook_type/theme to show bar
+MIN_SAMPLE = 3
 
 
 def _grouped_bar_chart(my_df: pd.DataFrame, comp_df: pd.DataFrame, group_col: str, title: str):
@@ -20,38 +20,30 @@ def _grouped_bar_chart(my_df: pd.DataFrame, comp_df: pd.DataFrame, group_col: st
     merged = my_agg.merge(comp_agg, on=group_col, how="outer").fillna(0)
 
     fig = go.Figure()
-
     for _, row in merged.iterrows():
         label = row[group_col]
-        if row["my_count"] >= MIN_SAMPLE:
-            fig.add_trace(go.Bar(
-                name=f"Jij ({label})",
-                x=[label], y=[row["my_avg"]],
-                marker_color="#4ade80",
-                showlegend=False,
-            ))
-        else:
-            fig.add_trace(go.Bar(
-                name=f"Jij ({label})",
-                x=[label], y=[row["my_avg"] if row["my_count"] > 0 else 0],
-                marker_color="#374151",
-                text=[f"te weinig data (n={int(row['my_count'])})"],
-                textposition="inside",
-                showlegend=False,
-            ))
+        my_color = "#4ade80" if row["my_count"] >= MIN_SAMPLE else "#374151"
         fig.add_trace(go.Bar(
-            name=f"Concurrenten ({label})",
-            x=[label], y=[row["comp_avg"]],
-            marker_color="#6b7280",
-            showlegend=False,
+            name=f"Jij ({label})", x=[label], y=[row["my_avg"]],
+            marker_color=my_color, showlegend=False,
+            text=[f"n={int(row['my_count'])}"] if row["my_count"] < MIN_SAMPLE and row["my_count"] > 0 else None,
+            textposition="inside",
+        ))
+        fig.add_trace(go.Bar(
+            name=f"Concurrenten ({label})", x=[label], y=[row["comp_avg"]],
+            marker_color="#374151", showlegend=False,
         ))
 
     fig.update_layout(
-        title=title,
+        title=dict(text=title, font=dict(size=14, color="#9ca3af")),
         barmode="group",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         yaxis_title="Gem. Viral Score",
+        yaxis=dict(gridcolor="rgba(255,255,255,0.06)", color="#6b7280"),
+        xaxis=dict(color="#9ca3af"),
+        margin=dict(l=0, r=0, t=40, b=0),
+        font=dict(family="Inter, sans-serif"),
     )
     return fig, merged
 
@@ -67,12 +59,11 @@ def render(week):
         st.info("Nog geen data voor @aymanraoul. Zorg dat de scraper gedraaid heeft.")
         return
 
-    # Section 1 — KPI cards
+    # KPI cards
     col1, col2, col3 = st.columns(3)
     my_avg = sum(r["viral_score"] for r in my_week_reels) / max(len(my_week_reels), 1)
     comp_avg = sum(r["viral_score"] for r in competitor_reels) / max(len(competitor_reels), 1)
     diff = my_avg - comp_avg
-
     with col1:
         st.metric("Jouw gem. score", f"{my_avg:.0f}")
     with col2:
@@ -80,7 +71,9 @@ def render(week):
     with col3:
         st.metric("Verschil", f"{diff:+.0f}")
 
-    # Trend chart (all time)
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # Trend chart
     if len(my_reels) >= 2:
         df_all = pd.DataFrame(my_reels)
         df_all["posted_at"] = pd.to_datetime(df_all["posted_at"], errors="coerce")
@@ -90,16 +83,23 @@ def render(week):
             title="Viral Score Over Tijd",
             labels={"posted_at": "Datum", "viral_score": "Viral Score"},
         )
-        fig.update_traces(line_color="#4ade80")
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        fig.update_traces(line_color="#4ade80", line_width=2)
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            title=dict(font=dict(size=14, color="#9ca3af")),
+            yaxis=dict(gridcolor="rgba(255,255,255,0.06)", color="#6b7280"),
+            xaxis=dict(color="#9ca3af"),
+            margin=dict(l=0, r=0, t=40, b=0),
+            font=dict(family="Inter, sans-serif"),
+        )
         st.plotly_chart(fig, use_container_width=True)
 
-    # Section 2 — Hook type breakdown
+    # Hook & Theme breakdown
     if my_reels and competitor_reels:
-        st.markdown("### Hook Type Breakdown")
         my_df = pd.DataFrame(my_reels)
         comp_df = pd.DataFrame(competitor_reels)
 
+        st.markdown("### Hook Type Breakdown")
         fig_hook, hook_merged = _grouped_bar_chart(my_df, comp_df, "hook_type", "Jij vs Concurrenten per Hook Type")
         st.plotly_chart(fig_hook, use_container_width=True)
 
@@ -109,7 +109,6 @@ def render(week):
             best = qualified.loc[qualified["diff"].idxmax()]
             st.success(f"✅ Je scoort **{best['diff']:.0f}pt** beter op **{best['hook_type']}** hooks → post er meer van")
 
-        # Section 3 — Theme breakdown
         st.markdown("### Thema Breakdown")
         fig_theme, theme_merged = _grouped_bar_chart(my_df, comp_df, "theme", "Jij vs Concurrenten per Thema")
         st.plotly_chart(fig_theme, use_container_width=True)
@@ -119,26 +118,10 @@ def render(week):
             worst = qualified_theme.loc[qualified_theme["my_avg"].idxmin()]
             st.warning(f"⚠️ Je **{worst['theme']}** content scoort zwak (gem. {worst['my_avg']:.0f}) → test een andere aanpak")
 
-    # Section 4 — Weekly reels
+    # Weekly reels
     st.markdown("### Deze Week")
     if not my_week_reels:
         st.info("Geen eigen Reels gescraped voor deze week.")
     else:
         for reel in my_week_reels:
-            col1, col2, col3 = st.columns([1, 6, 1])
-            with col1:
-                if reel.get("thumbnail_url"):
-                    st.image(reel["thumbnail_url"], width=120)
-            with col2:
-                score = reel.get("viral_score", 0)
-                badge = "🟢" if score >= 70 else "🟡" if score >= 50 else "🔴"
-                hook = reel.get("hook", "—")
-                st.markdown(f"**{hook[:80]}{'…' if len(hook) > 80 else ''}** {badge} `{score}`")
-                st.caption(
-                    f"👁 {reel.get('views', 0):,} · ❤️ {reel.get('likes', 0):,} · "
-                    f"💬 {reel.get('comments', 0):,} · {str(reel.get('posted_at', ''))[:10]}"
-                )
-            with col3:
-                if st.button("🔍 Bekijk", key=f"mp_{reel['reel_id']}"):
-                    show_reel_modal(reel)
-            st.divider()
+            render_reel_card(reel, button_key=f"mp_{reel['reel_id']}")

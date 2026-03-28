@@ -1,7 +1,7 @@
 # dashboard/tabs/viral_overview.py
 import streamlit as st
 from dashboard.queries import get_reels
-from dashboard.components.reel_modal import show_reel_modal
+from dashboard.components.reel_card import render_reel_card
 
 
 def render(week, min_score):
@@ -15,17 +15,4 @@ def render(week, min_score):
         return
 
     for reel in reels[:20]:
-        col1, col2, col3 = st.columns([1, 6, 1])
-        with col1:
-            if reel.get("thumbnail_url"):
-                st.image(reel["thumbnail_url"], width=120)
-        with col2:
-            score = reel.get("viral_score", 0)
-            badge = "🟢" if score >= 70 else "🟡" if score >= 50 else "🔴"
-            hook = reel.get("hook", "—")
-            st.markdown(f"**{hook[:80]}{'…' if len(hook) > 80 else ''}** {badge} `{score}`")
-            st.caption(f"@{reel['competitor_handle']} · {reel.get('theme', '—')} · {reel.get('hook_type', '—')}")
-        with col3:
-            if st.button("🔍 Bekijk", key=f"vo_{reel['reel_id']}"):
-                show_reel_modal(reel)
-        st.divider()
+        render_reel_card(reel, button_key=f"vo_{reel['reel_id']}")
