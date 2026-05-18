@@ -22,10 +22,11 @@ def render(week, min_score):
     top_handle = max(set(handles), key=handles.count) if handles else "—"
 
     col1, col2, col3, col4 = st.columns(4)
+    display_handle = f"{top_handle[:11]}…" if len(top_handle) > 12 else top_handle
     col1.metric("REELS GESCRAPED", len(all_week))
     col2.metric("GEM. VIRAL SCORE", f"{avg_score:.0f}")
     col3.metric("TOP VIEWS", f"{top_views:,}")
-    col4.metric("MEEST ACTIEF", f"@{top_handle}")
+    col4.metric("MEEST ACTIEF", f"@{display_handle}")
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 

@@ -9,6 +9,7 @@ from dashboard.queries import get_available_weeks
 from dashboard.tabs import (
     viral_overview, niche_discovery, competitor_breakdown,
     hook_library, value_content, my_performance, weekly_summary,
+    video_analyse,
 )
 
 st.set_page_config(
@@ -65,7 +66,7 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Tabs ────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🔥 Viral Content",
     "🔍 Niche Discovery",
     "👥 Per Concurrent",
@@ -73,6 +74,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "💡 Value Content",
     "📈 Mijn Performance",
     "📋 Weekly Summary",
+    "🔬 Video Analyse",
 ])
 
 with tab1:
@@ -89,3 +91,5 @@ with tab6:
     my_performance.render(selected_week)
 with tab7:
     weekly_summary.render(selected_week)
+with tab8:
+    video_analyse.render()

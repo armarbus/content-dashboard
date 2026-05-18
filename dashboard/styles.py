@@ -73,6 +73,9 @@ GLOBAL_CSS = """
     font-size: 32px !important;
     font-weight: 600 !important;
     color: #F5F5F5 !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
 }
 [data-testid="stMetricDelta"] {
     font-family: 'Roboto Mono', monospace !important;

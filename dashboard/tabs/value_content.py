@@ -29,11 +29,11 @@ def render(week):
 
     if unclassified_count > 0 and not reels:
         st.info(
-            f"{unclassified_count} reels zijn nog niet geclassificeerd. "
-            "Na de volgende wekelijkse scrape wordt elk reel automatisch gelabeld als "
-            "value of top-funnel."
+            f"**{unclassified_count} reels** zijn nog niet geclassificeerd door de AI "
+            f"(data van vóór de content-type update). "
+            f"Hieronder zie je reels die via caption-keywords als *value* herkend worden. "
+            f"Na de volgende wekelijkse scrape wordt alles automatisch gelabeld."
         )
-        return
 
     if not reels:
         st.info("Geen value content gevonden deze week. Top-funnel reels zijn gefilterd.")

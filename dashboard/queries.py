@@ -43,6 +43,17 @@ def get_reels(week=None, min_score=0, handles=None, hook_types=None, themes=None
     return data
 
 
+_VALUE_KEYWORDS = {
+    "how to", "how-to", "tip", "tips", "waarom", "leer", "doe dit",
+    "zo doe je", "methode", "strategie", "protocol", "wetenschap",
+    "studie", "onderzoek", "bewijs", "regel", "fout", "verkeerd",
+    "why", "how", "mistake", "truth", "fact", "science", "research",
+    "secret", "regel", "uitleg", "explained", "guide", "tutorial",
+    "mistake", "wrong", "right way", "stop doing", "start doing",
+    "les", "leert", "learn", "training", "program", "workout",
+}
+
+
 def _is_value_content(r: dict) -> bool:
     """Returns True if a reel is classified as educational value content."""
     ct = r.get("content_type")
@@ -50,9 +61,13 @@ def _is_value_content(r: dict) -> bool:
         return True
     if ct == "top_funnel":
         return False
-    # Unclassified (old data): use transcript length as proxy
+    # Unclassified (old data): transcript length first
     transcript = r.get("transcript") or ""
-    return len(transcript) > 100
+    if len(transcript) > 100:
+        return True
+    # Caption keyword heuristic for pre-classification data
+    caption = (r.get("caption") or "").lower()
+    return any(kw in caption for kw in _VALUE_KEYWORDS)
 
 
 @st.cache_data(ttl=300)
