@@ -1,0 +1,31 @@
+name: Keepalive
+
+on:
+  schedule:
+    - cron: "0 8 * * 1,4"  # Every Monday and Thursday at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit app
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            "https://content-dashboard-ebebmcogappwgjzjwkk3geo.streamlit.app/")
+          echo "Streamlit status: $STATUS"
+
+      - name: Ping Supabase (keep project active)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/reels?select=reel_id&limit=1")
+          echo "Supabase status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "WARNING: Supabase returned $STATUS"
+            exit 1
+          fi
