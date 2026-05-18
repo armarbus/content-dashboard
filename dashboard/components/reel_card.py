@@ -55,8 +55,14 @@ def render_reel_card(reel: dict, button_key: str) -> None:
     with st.container(border=True):
         col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
-            if reel.get("thumbnail_url"):
-                st.image(reel["thumbnail_url"], width=110)
+            url = reel.get("thumbnail_url", "")
+            if url and isinstance(url, str) and url.startswith("http"):
+                st.markdown(
+                    f'<div style="width:110px;height:80px;border-radius:2px;'
+                    f'background:#1E1E1E url(\'{url}\') center/cover no-repeat;'
+                    f'flex-shrink:0"></div>',
+                    unsafe_allow_html=True,
+                )
             else:
                 _placeholder()
         with col2:

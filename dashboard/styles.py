@@ -10,6 +10,7 @@ Border radius: max 4px.
 GLOBAL_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 /* ── Base ───────────────────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -214,5 +215,12 @@ h3 {
 ::-webkit-scrollbar-track { background: #0A0A0A; }
 ::-webkit-scrollbar-thumb { background: #1E1E1E; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #E9003A; }
+
+/* ── Material Icons / tooltip fix ───────────────────────────────────── */
+/* Prevent icon ligature fallback text from rendering visibly */
+.material-icons { font-family: 'Material Icons' !important; }
+/* Hide stray tooltip text that appears top-left on hover */
+[data-testid="stTooltipHoverTarget"] .material-icons,
+button .material-icons { font-size: 18px; vertical-align: middle; }
 </style>
 """

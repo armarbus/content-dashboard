@@ -19,7 +19,7 @@ def render(week, min_score):
 
         st.markdown(
             f'<h3 style="font-size:16px;font-weight:700;margin:20px 0 4px 0">'
-            f'Viral in <span style="color:#4ade80">{tag}</span> deze week</h3>',
+            f'Viral in <span style="color:#00C27A">{tag}</span> deze week</h3>',
             unsafe_allow_html=True,
         )
         st.caption(f"{len(tag_reels)} reels gevonden · min score {min_score}")

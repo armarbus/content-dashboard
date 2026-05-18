@@ -64,7 +64,7 @@ def parse_reel(raw: dict, handle: str, is_own: bool) -> dict:
         "reel_id":           raw.get("shortCode") or raw.get("id", ""),
         "is_own_account":    is_own,
         "competitor_handle": handle,
-        "video_url":         raw.get("url") or f"https://www.instagram.com/reel/{raw.get('shortCode', '')}/",
+        "video_url":         raw.get("videoUrl") or raw.get("url") or f"https://www.instagram.com/reel/{raw.get('shortCode', '')}/",
         "thumbnail_url":     raw.get("displayUrl", ""),
         "caption":           raw.get("caption", "") or "",
         "views":             max(0, raw.get("videoViewCount") or raw.get("videoPlayCount") or 0),

@@ -12,7 +12,7 @@ from dashboard.tabs import (
 )
 
 st.set_page_config(
-    page_title="Back 2 Work — Content Dashboard",
+    page_title="Verbond Performance — Content Dashboard",
     page_icon="🔥",
     layout="wide",
 )
@@ -24,7 +24,7 @@ st.markdown("""
 <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #1E1E1E">
     <span style="font-family:'Anton',sans-serif;font-size:26px;font-weight:400;
         text-transform:uppercase;letter-spacing:0.06em;color:#F5F5F5;
-        line-height:1">BACK 2 WORK</span>
+        line-height:1">VERBOND PERFORMANCE</span>
     <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
         <span style="width:20px;height:2px;background:#E9003A;display:inline-block;flex-shrink:0"></span>
         <span style="color:#B7B7B7;font-size:10px;font-weight:700;letter-spacing:2px;

@@ -168,6 +168,32 @@ def render(week):
                 f"⚠️ **{worst['theme'].upper()}** scoort zwak (gem. {worst['my_avg']:.0f}) — test een andere aanpak"
             )
 
+    # ── Content Goals ─────────────────────────────────────────────────
+    st.markdown("### Content Goals")
+    GOALS = {"Viral Score Doel": (my_avg, 75), "Reels Deze Week": (len(my_week_reels), 5), "Avg Views Doel": (
+        sum(r.get("views", 0) for r in my_week_reels) / max(len(my_week_reels), 1) / 1000, 50,
+    )}
+    GOAL_LABELS = {"Viral Score Doel": f"{my_avg:.0f} / 75", "Reels Deze Week": f"{len(my_week_reels)} / 5",
+                   "Avg Views Doel": f"{sum(r.get('views',0) for r in my_week_reels)/max(len(my_week_reels),1)/1000:.0f}k / 50k"}
+    gcol1, gcol2, gcol3 = st.columns(3)
+    for col, (label, (val, target)) in zip([gcol1, gcol2, gcol3], GOALS.items()):
+        pct = min(val / max(target, 1), 1.0)
+        bar_color = "#00C27A" if pct >= 1.0 else "#E9003A" if pct >= 0.6 else "#B7B7B7"
+        with col:
+            st.markdown(
+                f'<div style="background:#1E1E1E;border:1px solid #2a2a2a;border-radius:4px;padding:16px 18px">'
+                f'<p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+                f'color:#B7B7B7;font-family:Inter,sans-serif;margin:0 0 8px 0">{label}</p>'
+                f'<p style="font-family:Roboto Mono,monospace;font-size:22px;font-weight:600;'
+                f'color:#F5F5F5;margin:0 0 10px 0">{GOAL_LABELS[label]}</p>'
+                f'<div style="background:#2a2a2a;border-radius:2px;height:4px">'
+                f'<div style="background:{bar_color};width:{pct*100:.0f}%;height:4px;border-radius:2px;'
+                f'transition:width 0.3s ease"></div></div></div>',
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+
     # ── Weekly reels ──────────────────────────────────────────────────
     st.markdown("### Deze Week")
     if not my_week_reels:
