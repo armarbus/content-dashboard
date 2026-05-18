@@ -10,7 +10,7 @@ MIN_SAMPLE = 3
 
 # Brand colors
 OWN_COLOR = "#E9003A"       # Hybrid Red — own bars
-OWN_WEAK_COLOR = "#2a2a2a"  # steel — too little data
+OWN_WEAK_COLOR = "#3d3d3d"  # muted — too little data
 COMP_COLOR = "#1E1E1E"      # steel grey — competitor bars
 GRID_COLOR = "rgba(30,30,30,0.8)"
 TEXT_COLOR = "#B7B7B7"
@@ -189,9 +189,14 @@ def render(week):
         if not qualified.empty:
             qualified["diff"] = qualified["my_avg"] - qualified["comp_avg"]
             best = qualified.loc[qualified["diff"].idxmax()]
-            st.success(
-                f"✅ **{best['hook_type'].upper()}** scoort {best['diff']:.0f}pt boven concurrentie — post er meer van"
-            )
+            if best["diff"] > 0:
+                st.success(
+                    f"✅ **{best['hook_type'].upper()}** scoort {best['diff']:.0f}pt boven concurrentie — post er meer van"
+                )
+            else:
+                st.info(
+                    f"📊 **{best['hook_type'].upper()}** is je sterkste hook — scoort {abs(best['diff']):.0f}pt onder concurrentie"
+                )
 
         st.markdown("### Thema Breakdown")
         fig_theme, theme_merged = _grouped_bar_chart(

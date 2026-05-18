@@ -48,6 +48,10 @@ GLOBAL_CSS = """
     background: #E9003A !important;
     color: #F5F5F5 !important;
 }
+/* Hide Streamlit's default tab underline indicator — we use background colour instead */
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none !important;
+}
 
 /* ── Metric cards ───────────────────────────────────────────────────── */
 [data-testid="stMetric"] {
