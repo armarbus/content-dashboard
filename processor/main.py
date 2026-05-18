@@ -19,6 +19,9 @@ from processor.transcriber import transcribe_top_reels, TOP_N_TRANSCRIBE
 
 load_dotenv()
 
+# Competitor reels onder dit aantal views zijn geen benchmark waard
+MIN_COMPETITOR_VIEWS = 20_000
+
 
 def _build_record(reel: dict, week_start_str: str) -> dict:
     """Score + analyze a single reel and return the complete record dict."""
@@ -74,10 +77,23 @@ def run():
 
     print("\n🧠 Analyzing reels with OpenAI...")
     all_records = []
+    skipped = 0
     for i, reel in enumerate(raw_reels, 1):
-        print(f"  [{i}/{len(raw_reels)}] @{reel['competitor_handle']} — {reel['reel_id']}")
+        handle = reel['competitor_handle']
+        is_own = reel.get('is_own_account', False)
+        views = reel.get('views', 0)
+
+        if not is_own and views < MIN_COMPETITOR_VIEWS:
+            print(f"  [{i}/{len(raw_reels)}] ⏭️  @{handle} — {views:,} views (onder {MIN_COMPETITOR_VIEWS:,}, skip)")
+            skipped += 1
+            continue
+
+        print(f"  [{i}/{len(raw_reels)}] @{handle} — {reel['reel_id']} ({views:,} views)")
         record = _build_record(reel, week_start_str)
         all_records.append(record)
+
+    if skipped:
+        print(f"  → {skipped} reels overgeslagen (onder {MIN_COMPETITOR_VIEWS:,} views)")
 
     # Pass 2 — Transcribe top 20
     print(f"\n🎙️  Transcribing top {TOP_N_TRANSCRIBE} reels with Whisper...")
