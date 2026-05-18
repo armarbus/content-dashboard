@@ -19,7 +19,8 @@ def get_available_weeks():
 
 
 @st.cache_data(ttl=300)
-def get_reels(week=None, min_score=0, handles=None, hook_types=None, themes=None, own_only=False, competitors_only=False):
+def get_reels(week=None, min_score=0, handles=None, hook_types=None, themes=None,
+              own_only=False, competitors_only=False, value_only=False):
     q = get_client().table("reels").select("*")
     if week:
         q = q.eq("week_start_date", week)
@@ -37,7 +38,21 @@ def get_reels(week=None, min_score=0, handles=None, hook_types=None, themes=None
         data = [r for r in data if r.get("hook_type") in hook_types]
     if themes:
         data = [r for r in data if r.get("theme") in themes]
+    if value_only:
+        data = [r for r in data if _is_value_content(r)]
     return data
+
+
+def _is_value_content(r: dict) -> bool:
+    """Returns True if a reel is classified as educational value content."""
+    ct = r.get("content_type")
+    if ct == "value":
+        return True
+    if ct == "top_funnel":
+        return False
+    # Unclassified (old data): use transcript length as proxy
+    transcript = r.get("transcript") or ""
+    return len(transcript) > 100
 
 
 @st.cache_data(ttl=300)

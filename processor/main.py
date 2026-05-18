@@ -52,6 +52,7 @@ def _build_record(reel: dict, week_start_str: str) -> dict:
         "hook": analysis["hook"],
         "hook_type": analysis["hook_type"],
         "theme": analysis["theme"],
+        "content_type": analysis["content_type"],
         "ai_why": analysis["ai_why"],
         "ai_your_version": analysis["ai_your_version"],
         "source": reel.get("source", "account"),

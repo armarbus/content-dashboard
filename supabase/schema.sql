@@ -61,3 +61,5 @@ alter table reels add column if not exists transcript text;
 alter table reels add column if not exists source text default 'account';
 alter table reels add column if not exists niche_tag text
   check (niche_tag is null or niche_tag like '#%');
+alter table reels add column if not exists content_type text
+  check (content_type is null or content_type in ('value', 'top_funnel'));

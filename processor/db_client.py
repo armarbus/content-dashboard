@@ -22,6 +22,7 @@ def get_client() -> Client:
 
 VALID_HOOK_TYPES = {'identiteit', 'tegenstelling', 'discipline', 'transformatie', 'lifestyle', 'anders'}
 VALID_THEMES = {'hybrid', 'kracht', 'voeding', 'mindset', 'lifestyle', 'anders'}
+VALID_CONTENT_TYPES = {'value', 'top_funnel'}
 
 
 def upsert_reel(reel: dict) -> None:
@@ -31,6 +32,8 @@ def upsert_reel(reel: dict) -> None:
         reel["hook_type"] = "anders"
     if reel.get("theme") not in VALID_THEMES:
         reel["theme"] = "anders"
+    if reel.get("content_type") not in VALID_CONTENT_TYPES:
+        reel["content_type"] = None
     client = get_client()
     client.table("reels").upsert(reel, on_conflict="reel_id").execute()
 

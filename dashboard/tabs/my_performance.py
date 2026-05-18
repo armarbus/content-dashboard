@@ -105,36 +105,74 @@ def render(week):
         st.info(f"Nog geen data voor @{handle}. Zorg dat de scraper gedraaid heeft.")
         return
 
-    # ── KPI cards ─────────────────────────────────────────────────────
-    col1, col2, col3 = st.columns(3)
+    # ── KPI helpers ───────────────────────────────────────────────────
+    def _eng_rate(reels):
+        rates = [
+            (r.get("likes", 0) + r.get("comments", 0)) / r["views"] * 100
+            for r in reels if r.get("views", 0) > 0
+        ]
+        return sum(rates) / len(rates) if rates else 0.0
+
     my_avg = sum(r["viral_score"] for r in my_week_reels) / max(len(my_week_reels), 1)
     comp_avg = sum(r["viral_score"] for r in competitor_reels) / max(len(competitor_reels), 1)
     diff = my_avg - comp_avg
-    with col1:
-        st.metric("GEM. VIRAL SCORE", f"{my_avg:.0f}")
-    with col2:
-        st.metric("CONCURRENTIE GEM.", f"{comp_avg:.0f}")
-    with col3:
-        st.metric("VERSCHIL", f"{diff:+.0f}")
+    my_avg_views = sum(r.get("views", 0) for r in my_week_reels) / max(len(my_week_reels), 1)
+    my_eng = _eng_rate(my_week_reels)
+    comp_eng = _eng_rate(competitor_reels)
+
+    # ── KPI cards — row 1: viral score ────────────────────────────────
+    col1, col2, col3 = st.columns(3)
+    col1.metric("GEM. VIRAL SCORE", f"{my_avg:.0f}")
+    col2.metric("CONCURRENTIE GEM.", f"{comp_avg:.0f}")
+    col3.metric("VERSCHIL", f"{diff:+.0f}")
+
+    # ── KPI cards — row 2: views + engagement ────────────────────────
+    col4, col5, col6 = st.columns(3)
+    col4.metric("GEM. VIEWS", f"{my_avg_views:,.0f}")
+    col5.metric("ENGAGEMENT %", f"{my_eng:.2f}%")
+    col6.metric("COMP. ENGAGEMENT %", f"{comp_eng:.2f}%",
+                delta=f"{my_eng - comp_eng:+.2f}%",
+                delta_color="normal")
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # ── Trend chart ───────────────────────────────────────────────────
+    # ── Trend charts ──────────────────────────────────────────────────
     if len(my_reels) >= 2:
         df_all = pd.DataFrame(my_reels)
         df_all["posted_at"] = pd.to_datetime(df_all["posted_at"], errors="coerce")
         df_all = df_all.dropna(subset=["posted_at"]).sort_values("posted_at")
-        fig = px.line(
-            df_all, x="posted_at", y="viral_score",
-            title="VIRAL SCORE OVER TIJD",
-            labels={"posted_at": "Datum", "viral_score": "Viral Score"},
+        df_all["engagement_pct"] = df_all.apply(
+            lambda r: (r.get("likes", 0) + r.get("comments", 0)) / r["views"] * 100
+            if r.get("views", 0) > 0 else 0,
+            axis=1,
         )
-        fig.update_traces(line_color=OWN_COLOR, line_width=2)
-        fig.update_layout(
-            title=dict(font=dict(family="Anton", size=14, color=TEXT_COLOR)),
-            **CHART_LAYOUT,
-        )
-        st.plotly_chart(fig, use_container_width=True)
+
+        tcol1, tcol2 = st.columns(2)
+        with tcol1:
+            fig_score = px.line(
+                df_all, x="posted_at", y="viral_score",
+                title="VIRAL SCORE OVER TIJD",
+                labels={"posted_at": "", "viral_score": "Score"},
+            )
+            fig_score.update_traces(line_color=OWN_COLOR, line_width=2)
+            fig_score.update_layout(
+                title=dict(font=dict(family="Anton", size=13, color=TEXT_COLOR)),
+                **CHART_LAYOUT,
+            )
+            st.plotly_chart(fig_score, use_container_width=True)
+
+        with tcol2:
+            fig_views = px.line(
+                df_all, x="posted_at", y="views",
+                title="VIEWS OVER TIJD",
+                labels={"posted_at": "", "views": "Views"},
+            )
+            fig_views.update_traces(line_color="#00C27A", line_width=2)
+            fig_views.update_layout(
+                title=dict(font=dict(family="Anton", size=13, color=TEXT_COLOR)),
+                **CHART_LAYOUT,
+            )
+            st.plotly_chart(fig_views, use_container_width=True)
 
     # ── Hook & Theme breakdown ────────────────────────────────────────
     if my_reels and competitor_reels:
@@ -170,22 +208,24 @@ def render(week):
 
     # ── Content Goals ─────────────────────────────────────────────────
     st.markdown("### Content Goals")
-    GOALS = {"Viral Score Doel": (my_avg, 75), "Reels Deze Week": (len(my_week_reels), 5), "Avg Views Doel": (
-        sum(r.get("views", 0) for r in my_week_reels) / max(len(my_week_reels), 1) / 1000, 50,
-    )}
-    GOAL_LABELS = {"Viral Score Doel": f"{my_avg:.0f} / 75", "Reels Deze Week": f"{len(my_week_reels)} / 5",
-                   "Avg Views Doel": f"{sum(r.get('views',0) for r in my_week_reels)/max(len(my_week_reels),1)/1000:.0f}k / 50k"}
-    gcol1, gcol2, gcol3 = st.columns(3)
-    for col, (label, (val, target)) in zip([gcol1, gcol2, gcol3], GOALS.items()):
+    avg_views_k = my_avg_views / 1000
+    goals = [
+        ("Viral Score",        my_avg,           75,    f"{my_avg:.0f} / 75"),
+        ("Reels Deze Week",    len(my_week_reels), 5,   f"{len(my_week_reels)} / 5"),
+        ("Avg Views",          avg_views_k,       50,   f"{avg_views_k:.0f}k / 50k"),
+        ("Engagement %",       my_eng,            3.0,  f"{my_eng:.2f}% / 3%"),
+    ]
+    gcols = st.columns(4)
+    for col, (label, val, target, display) in zip(gcols, goals):
         pct = min(val / max(target, 1), 1.0)
         bar_color = "#00C27A" if pct >= 1.0 else "#E9003A" if pct >= 0.6 else "#B7B7B7"
         with col:
             st.markdown(
-                f'<div style="background:#1E1E1E;border:1px solid #2a2a2a;border-radius:4px;padding:16px 18px">'
+                f'<div style="background:#1E1E1E;border:1px solid #2a2a2a;border-radius:4px;padding:14px 16px">'
                 f'<p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
-                f'color:#B7B7B7;font-family:Inter,sans-serif;margin:0 0 8px 0">{label}</p>'
-                f'<p style="font-family:Roboto Mono,monospace;font-size:22px;font-weight:600;'
-                f'color:#F5F5F5;margin:0 0 10px 0">{GOAL_LABELS[label]}</p>'
+                f'color:#B7B7B7;font-family:Inter,sans-serif;margin:0 0 6px 0">{label}</p>'
+                f'<p style="font-family:Roboto Mono,monospace;font-size:20px;font-weight:600;'
+                f'color:#F5F5F5;margin:0 0 10px 0">{display}</p>'
                 f'<div style="background:#2a2a2a;border-radius:2px;height:4px">'
                 f'<div style="background:{bar_color};width:{pct*100:.0f}%;height:4px;border-radius:2px;'
                 f'transition:width 0.3s ease"></div></div></div>',

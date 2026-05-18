@@ -9,27 +9,25 @@ from typing import Optional
 from openai import OpenAI
 
 
-SYSTEM_PROMPT = """Je bent een content analist voor Ayman, een hybrid performance coach.
-Zijn merk: kracht + hardlopen, discipline, stoïcijnse mindset, masculine lifestyle.
+SYSTEM_PROMPT = """Je bent een content analist voor Verbond Performance, een hybrid performance merk.
+Merk: kracht + hardlopen, discipline, stoïcijnse mindset, masculine lifestyle.
 Doelgroep: mannen 16-35 die sterker, droger en mentaal scherper willen worden.
-Merkboodschap: "Bouw een hybride lichaam. Bouw discipline. Bouw jezelf."
-Zijn eigen hook-stijl: identiteit ("mannen die trainen winnen"), tegenstelling
-("stop met alleen bulken"), discipline ("je hoeft je niet goed te voelen om te winnen"),
-lifestyle ("sober living, early mornings, consistent training").
 
 Analyseer de aangeleverde Instagram Reel en geef ALLEEN een JSON object terug (geen markdown):
 {
   "hook": "eerste 6-8 woorden van de tekst, of korte beschrijving als er geen tekst is",
   "hook_type": "een van: identiteit | tegenstelling | discipline | transformatie | lifestyle | anders",
   "theme": "een van: hybrid | kracht | voeding | mindset | lifestyle | anders",
+  "content_type": "value" als de video echt iets leert (how-to, tips, uitleg, wetenschap, mindset les met narration/voice-over) | "top_funnel" als het voornamelijk muziek + tekst/montage/esthetisch is zonder echte les,
   "ai_why": "1-2 zinnen waarom deze video viral gaat in de hybrid/fitness niche",
-  "ai_your_version": "concrete hook of idee hoe Ayman dit kan nabouwen voor zijn merk"
+  "ai_your_version": "concrete hook of idee hoe dit nagebouwd kan worden voor Verbond Performance"
 }"""
 
 FALLBACK = {
     "hook": "Geen tekst beschikbaar",
     "hook_type": "anders",
     "theme": "anders",
+    "content_type": "top_funnel",
     "ai_why": "",
     "ai_your_version": "",
 }
@@ -64,9 +62,11 @@ def parse_ai_response(raw: str) -> dict:
     try:
         cleaned = re.sub(r"```(?:json)?|```", "", raw).strip()
         data = json.loads(cleaned)
-        for key in ("hook", "hook_type", "theme", "ai_why", "ai_your_version"):
+        for key in ("hook", "hook_type", "theme", "content_type", "ai_why", "ai_your_version"):
             if key not in data:
                 data[key] = FALLBACK[key]
+        if data.get("content_type") not in ("value", "top_funnel"):
+            data["content_type"] = "top_funnel"
         return data
     except Exception:
         return FALLBACK.copy()
@@ -86,7 +86,7 @@ def analyze_reel(caption: str, handle: str) -> dict:
                 {"role": "user", "content": build_prompt_content(caption, handle)},
             ],
             temperature=0.3,
-            max_tokens=300,
+            max_tokens=350,
         )
         raw = response.choices[0].message.content
         return parse_ai_response(raw)
